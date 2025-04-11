@@ -26,6 +26,9 @@ int main()
     hard_assert(rc == PICO_OK);
     gpio_init(GPIO_WATCH_PIN);
     gpio_set_irq_enabled_with_callback(GPIO_WATCH_PIN, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
+    adc_init(); // init the adc module
+    adc_gpio_init(26); // set ADC0 pin to be adc input instead of GPIO
+    adc_select_input(0); // select to read from ADC0
     
     while (!stdio_usb_connected()) {
         sleep_ms(100);
