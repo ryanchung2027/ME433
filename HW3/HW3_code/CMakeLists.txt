@@ -44,9 +44,10 @@ pico_set_program_version(HW3_code "0.1")
 pico_enable_stdio_uart(HW3_code 0)
 pico_enable_stdio_usb(HW3_code 0)
 
-# Add the standard library to the build
+# Add the standard library and adc hardware libraryto the build
 target_link_libraries(HW3_code
-        pico_stdlib)
+        pico_stdlib
+        hardware_adc)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(HW3_code 1)

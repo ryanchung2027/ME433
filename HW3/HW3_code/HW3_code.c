@@ -1,21 +1,22 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
+#include "hardware/adc.h"
 
 // define GPIO pins
 #define GPIO_LED_PIN 19
 #define GPIO_WATCH_PIN 15
+
+int numSamp;
 
 int pico_led_init(void);
 void pico_set_led(bool led_on);
 
 // interrupt delcaration
 void gpio_callback(uint gpio, uint32_t events) {
-    if (!gpio_get(GPIO_LED_PIN)) {
-        pico_set_led(true);
-    } else {
-        pico_set_led(false);
-    }
+    pico_set_led(false);                            // turn off led
+    printf("Enter number of samples to take: ");    // prompt user
+
 }
 
 
@@ -35,7 +36,6 @@ int main()
     }
     pico_set_led(true);
 
- 
     while (true);
 }
 
