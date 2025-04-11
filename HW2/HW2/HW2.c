@@ -2,14 +2,17 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 
+// define GPIO pins
 #define GPIO_LED_PIN 19
 #define GPIO_WATCH_PIN 15
 
+// initialize count variable
 int count = 0;
 
 int pico_led_init(void);
 void pico_set_led(bool led_on);
 
+// interrupt delcaration
 void gpio_callback(uint gpio, uint32_t events) {
     if (!gpio_get(GPIO_LED_PIN)) {
         pico_set_led(true);
@@ -19,6 +22,7 @@ void gpio_callback(uint gpio, uint32_t events) {
     count++;
     printf("The button has been pressed %d times\n", count);
 }
+
 
 int main()
 {
@@ -30,7 +34,7 @@ int main()
     while (true);
 }
 
-// Perform initialisation
+// Perform led initialisation
 int pico_led_init(void) {
     #if defined(GPIO_LED_PIN)
         // A device like Pico that uses a GPIO for the LED will define GPIO_LED_PIN
