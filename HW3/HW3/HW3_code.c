@@ -7,9 +7,6 @@
 #define GPIO_LED_PIN 19
 #define GPIO_WATCH_PIN 15
 
-// initialize count variable
-int count = 0;
-
 int pico_led_init(void);
 void pico_set_led(bool led_on);
 
@@ -20,7 +17,6 @@ void gpio_callback(uint gpio, uint32_t events) {
     } else {
         pico_set_led(false);
     }
-    count++;
     printf("The button has been pressed %d times\n", count);
 }
 
@@ -32,7 +28,7 @@ int main()
     while (!stdio_usb_connected()) {
         sleep_ms(100);
     }
-    
+    pico_set_led(true);   
  
     while (1) {
         char message[100];
