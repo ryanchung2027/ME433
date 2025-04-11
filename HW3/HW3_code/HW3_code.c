@@ -14,9 +14,15 @@ void pico_set_led(bool led_on);
 
 // interrupt delcaration
 void gpio_callback(uint gpio, uint32_t events) {
+    int i;
     pico_set_led(false);                            // turn off led
-    printf("Enter number of samples to take: ");    // prompt user
-
+    while(true) {
+        printf("Enter number of samples to take: ");// prompt user
+        scanf("%d", &numSamp);
+        for (i = 0; i < numSamp; i++) {
+            uint16_t result = adc_read();
+        }
+    }
 }
 
 
