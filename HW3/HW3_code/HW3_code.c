@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
-#include "hardware/adc.h"
 
 // define GPIO pins
 #define GPIO_LED_PIN 19
@@ -17,25 +16,24 @@ void gpio_callback(uint gpio, uint32_t events) {
     } else {
         pico_set_led(false);
     }
-    printf("The button has been pressed %d times\n", count);
 }
 
 
 int main()
 {
     stdio_init_all();
+    int rc = pico_led_init();
+    hard_assert(rc == PICO_OK);
+    gpio_init(GPIO_WATCH_PIN);
+    gpio_set_irq_enabled_with_callback(GPIO_WATCH_PIN, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
     
     while (!stdio_usb_connected()) {
         sleep_ms(100);
     }
-    pico_set_led(true);   
+    pico_set_led(true);
+
  
-    while (1) {
-        char message[100];
-        scanf("%s", message);
-        printf("message: %s\r\n",message);
-        sleep_ms(50);
-    }
+    while (true);
 }
 
 
