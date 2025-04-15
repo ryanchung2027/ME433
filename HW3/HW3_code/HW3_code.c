@@ -8,21 +8,17 @@
 #define GPIO_WATCH_PIN 15
 
 int numSamp;
+volatile bool interrupt_flag = false;
+int results[100];
+float voltage[100];
 
 int pico_led_init(void);
 void pico_set_led(bool led_on);
 
 // interrupt delcaration
 void gpio_callback(uint gpio, uint32_t events) {
-    int i;
     pico_set_led(false);                            // turn off led
-    while(true) {
-        printf("Enter number of samples to take: ");// prompt user
-        scanf("%d", &numSamp);
-        for (i = 0; i < numSamp; i++) {
-            uint16_t result = adc_read();
-        }
-    }
+    interrupt_flag = true;
 }
 
 
@@ -40,11 +36,26 @@ int main()
     while (!stdio_usb_connected()) {
         sleep_ms(100);
     }
+
     pico_set_led(true);
 
-    while (true);
+    while (true) {
+        if (interrupt_flag) {
+            printf("Enter number of samples to take (1-100): \r\n"); // prompt user
+            scanf("%d", &numSamp);
+            int i;
+            for (i = 0; i < numSamp; i++) {
+                sleep_ms(10);                 // wait 10ms (100 Hz)
+                uint16_t result = adc_read(); // read adc value
+                results[i] = result;
+            }
+            for (i = 0; i < numSamp; i++) {
+                voltage[i] = 0.0008 * results[i];
+                printf("%.2f\r\n", voltage[i]);
+            }
+        }
+    }
 }
-
 
 // Perform led initialisation
 int pico_led_init(void) {
