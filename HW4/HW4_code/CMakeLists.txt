@@ -28,35 +28,30 @@ set(PICO_BOARD pico2 CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(HW4 C CXX ASM)
+project(HW4_code C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(HW4 HW4.c )
+add_executable(HW4_code HW4_code.c )
 
-pico_set_program_name(HW4 "HW4")
-pico_set_program_version(HW4 "0.1")
+pico_set_program_name(HW4_code "HW4_code")
+pico_set_program_version(HW4_code "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(HW4 0)
-pico_enable_stdio_usb(HW4 0)
+pico_enable_stdio_uart(HW4_code 0)
+pico_enable_stdio_usb(HW4_code 0)
 
 # Add the standard library to the build
-target_link_libraries(HW4
+target_link_libraries(HW4_code
         pico_stdlib)
 
 # Add the standard include files to the build
-target_include_directories(HW4 PRIVATE
+target_include_directories(HW4_code PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
 )
 
-# Add any user requested libraries
-target_link_libraries(HW4 
-        hardware_spi
-        )
-
-pico_add_extra_outputs(HW4)
+pico_add_extra_outputs(HW4_code)
 
