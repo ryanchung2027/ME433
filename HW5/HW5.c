@@ -12,6 +12,7 @@
 #define PIN_SCK  18
 #define PIN_MOSI 19
 #define PI 3.14159
+#define PIN_CS_RAM 14
 
 union FloatInt {
     float f;
@@ -33,32 +34,38 @@ int main()
 
     // SPI initialisation. This example will use SPI at 1MHz.
     spi_init(SPI_PORT, 1000*1000);
-    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_CS,   GPIO_FUNC_SIO);
-    gpio_set_function(PIN_SCK,  GPIO_FUNC_SPI);
-    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_MISO,  GPIO_FUNC_SPI);
+    gpio_set_function(PIN_CS,    GPIO_FUNC_SIO);
+    gpio_set_function(PIN_CS_RAM,GPIO_FUNC_SIO);
+    gpio_set_function(PIN_SCK,   GPIO_FUNC_SPI);
+    gpio_set_function(PIN_MOSI,  GPIO_FUNC_SPI);
     
     // Chip select is active-low, so we'll initialise it to a driven-high state
     gpio_put(PIN_CS,1); // initialize GP15 to high
     gpio_set_dir(PIN_CS, GPIO_OUT); // set GP15 to be output pin for chip select
+    gpio_put(PIN_CS_RAM,1); // initialize GP14 to high
+    gpio_set_dir(PIN_CS_RAM, GPIO_OUT); // set GP14 to be output pin for chip select
+
 
     spi_ram_init();
 
     // load 1000 floats into ERAM
-    float t = 0; int i = 0;
+    int i = 0;
     for (i = 0; i < 1000; i++) {
-        float v = sin_val(t); // sine wave
-        ram_data_write(i * 4, v);
-        t = t + 0.001;
+        float v = sin_val(i/1000.0); // sine wave
+        ram_data_write(i*4, v);
     }
+
 
     // read from ERAM into DAC
     int a = 0;
     while(1) {
         float v_read = ram_data_read(a);
+        printf("%.2f\n", v_read);
         data_write(0, v_read);
+        sleep_ms(1);
         a = a +  4;
-        if (a > 4000) {
+        if (a >= 4000) {
             a = 0;
         }
     }
@@ -137,8 +144,10 @@ void ram_data_write(uint16_t addr, float voltage) {
     buf[4] = (v.i >> 16) & 0xFF;
     buf[5] = (v.i >> 8) & 0xFF;
     buf[6] = v.i & 0xFF;
-
+    
+    cs_select(PIN_CS_RAM);
     spi_write_blocking(spi_default, buf, 7);
+    cs_deselect(PIN_CS_RAM);
 }
 
 
@@ -148,7 +157,9 @@ float ram_data_read(uint16_t addr) {
     write[1] = addr >> 8;
     write[2] = addr & 0xFF;
     
+    cs_select(PIN_CS_RAM);
     spi_write_read_blocking(spi_default, write, read, 7);
+    cs_deselect(PIN_CS_RAM);
 
     union FloatInt v;
     v.i = v.i | read[3] << 24;
@@ -189,5 +200,5 @@ static inline void cs_deselect(uint cs_pin) {
 }
 
 float sin_val(float time) { // generate a value along a 2Hz sine wave centered around 1.65 and an amplitude of 1.65
-    return 1.65*sin(((2*PI)/0.5)*time) + 1.65;
+    return 1.65*sin((2*PI)*time) + 1.65;
 }
