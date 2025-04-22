@@ -6,8 +6,11 @@
 // We are going to use SPI 0, and allocate it to the following GPIO pins
 // Pins can be changed, see the GPIO function select table in the datasheet for information on GPIO assignments
 #define SPI_PORT spi0
+#define PIN_MISO 16
 #define PIN_CS   15
-
+#define PIN_SCK  18
+#define PIN_MOSI 19
+#define PI 3.14159
 
 
 int main()
@@ -16,17 +19,24 @@ int main()
 
     // SPI initialisation. This example will use SPI at 1MHz.
     spi_init(SPI_PORT, 1000*1000);
-    gpio_set_function(PICO_DEFAULT_SPI_RX_PIN, GPIO_FUNC_SPI);
-    gpio_set_function(PICO_DEFAULT_SPI_SCK_PIN, GPIO_FUNC_SPI);
-    gpio_set_function(PICO_DEFAULT_SPI_TX_PIN, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_CS,   GPIO_FUNC_SIO);
+    gpio_set_function(PIN_SCK,  GPIO_FUNC_SPI);
+    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
     
     // Chip select is active-low, so we'll initialise it to a driven-high state
-    gpio_init(PIN_CS);
     gpio_put(PIN_CS,1); // initialize GP15 to high
     gpio_set_dir(PIN_CS, GPIO_OUT); // set GP15 to be output pin for chip select
 
-    
+    spi_ram_init();
 
+    float t = 0;
+    while(1) {
+        float v = sin_val(t); // sine wave
+        data_write(0, v);
+        t = t + 0.001;
+        sleep_ms(1);
+    }
     // // code for math and timing 
     // while (!stdio_usb_connected()) {}
     // sleep_ms(100);
@@ -78,6 +88,17 @@ int main()
     // printf("\nCycles for subtraction = %d", cycles_sub);
     // printf("\nCycles for multiplication = %d", cycles_mult);
     // printf("\nCycles for division = %d", cycles_div);
+}
+
+void spi_ram_init() {
+    uint8_t buf[2];
+    buf[0] = 0b1;
+    buf[1] = 0b01000000;    // sequential mode
+    spi_write_blocking(spi_default, buf, 2);
+}
+
+void ram_data_write() {
+    
 }
 
 
