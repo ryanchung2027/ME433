@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
+#include "math.h"
 
 // SPI Defines
 // We are going to use SPI 0, and allocate it to the following GPIO pins
@@ -19,6 +20,7 @@ union FloatInt {
 
 void spi_ram_init(); 
 void ram_data_write(uint16_t addr, float voltage); 
+float ram_data_read(uint16_t addr); 
 void data_write(int channel, float voltage);
 static inline void cs_select(uint cs_pin);
 static inline void cs_deselect(uint cs_pin);
@@ -54,7 +56,11 @@ int main()
     int a = 0;
     while(1) {
         float v_read = ram_data_read(a);
-
+        data_write(0, v_read);
+        a = a +  4;
+        if (a > 4000) {
+            a = 0;
+        }
     }
 
 
@@ -135,20 +141,6 @@ void ram_data_write(uint16_t addr, float voltage) {
     spi_write_blocking(spi_default, buf, 7);
 }
 
-void data_write(int channel, float voltage) {
-    uint8_t data[2];
-    int len = 2;
-    data[0] = 0;
-    data[0] = data[0] | (channel<<7);
-    data[0] = data[0] | (0b111<<4);
-    uint16_t v = (voltage/3.3) * 1023;
-    data[0] = data[0] | (v>>6);
-    data[1] = data[1] | (v<<2);
-
-    cs_select(PIN_CS);
-    spi_write_blocking(SPI_PORT, data, len); // where data is a uint8_t array with length len
-    cs_deselect(PIN_CS);
-}
 
 float ram_data_read(uint16_t addr) {
     uint8_t write[7], read[7];
@@ -165,6 +157,22 @@ float ram_data_read(uint16_t addr) {
     v.i = v.i | read[6];
 
     return v.f;
+}
+
+
+void data_write(int channel, float voltage) {
+    uint8_t data[2];
+    int len = 2;
+    data[0] = 0;
+    data[0] = data[0] | (channel<<7);
+    data[0] = data[0] | (0b111<<4);
+    uint16_t v = (voltage/3.3) * 1023;
+    data[0] = data[0] | (v>>6);
+    data[1] = data[1] | (v<<2);
+
+    cs_select(PIN_CS);
+    spi_write_blocking(SPI_PORT, data, len); // where data is a uint8_t array with length len
+    cs_deselect(PIN_CS);
 }
 
 
