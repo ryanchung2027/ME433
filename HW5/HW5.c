@@ -33,16 +33,21 @@ int main()
     printf("Enter two floats to use:");
     scanf("%f %f", &f1, &f2);
     volatile float f_add, f_sub, f_mult, f_div;
+    // run addition 1000 times
+    absolute_time_t t1_init = get_absolute_time();
+    uint64_t t_init = to_us_since_boot(t1_init);
     for (i = 0; i < 1000; i++) {
         f_add = f1+f2;
     }
-    absolute_time_t t1 = get_absolute_time();
-    uint64_t t = to_us_since_boot(t1);
-    printf("t = %llu\n", t);
-    f_sub = f1-f2;
-    f_mult = f1*f2;
-    f_div = f1/f2;
-    printf("\nResults: \n%f+%f=%f \n%f-%f=%f \n%f*%f=%f \n%f/%f=%f\n", f1,f2,f_add, f1,f2,f_sub, f1,f2,f_mult, f1,f2,f_div);
+    absolute_time_t t1_add = get_absolute_time();                   // get time for all addition operations
+    uint64_t t_add = to_us_since_boot(t1_add-t1_init);
+    int cycles_add = t_add / (6.667 / 1000 * 1000);                        // convert to cycles for one operation by dividing by 6.667 ns and 1000 cycles
+    printf("\ncycles for addition = %d\n", cycles_add);
+    printf("t_init = %llu, t_add = %llu", t_init, t_add);
+    // f_sub = f1-f2;
+    // f_mult = f1*f2;
+    // f_div = f1/f2;
+    // printf("\nResults: \n%f+%f=%f \n%f-%f=%f \n%f*%f=%f \n%f/%f=%f\n", f1,f2,f_add, f1,f2,f_sub, f1,f2,f_mult, f1,f2,f_div);
 
     
     
