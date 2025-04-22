@@ -19,6 +19,7 @@ union FloatInt {
 
 void spi_ram_init(); 
 void ram_data_write(uint16_t addr, float voltage); 
+void data_write(int channel, float voltage);
 static inline void cs_select(uint cs_pin);
 static inline void cs_deselect(uint cs_pin);
 float sin_val(float time);
@@ -41,13 +42,18 @@ int main()
 
     spi_ram_init();
 
+    // load 1000 floats into ERAM
     float t = 0; int i = 0;
     for (i = 0; i < 1000; i++) {
         float v = sin_val(t); // sine wave
-        ram_data_write(0, v);
+        ram_data_write(i * 4, v);
         t = t + 0.001;
     }
+
+    // read from ERAM into DAC
+    int a = 0;
     while(1) {
+        float v_read = ram_data_read(a);
 
     }
 
@@ -129,7 +135,22 @@ void ram_data_write(uint16_t addr, float voltage) {
     spi_write_blocking(spi_default, buf, 7);
 }
 
-float ram_data_read(uint16_t addr, float voltage) {
+void data_write(int channel, float voltage) {
+    uint8_t data[2];
+    int len = 2;
+    data[0] = 0;
+    data[0] = data[0] | (channel<<7);
+    data[0] = data[0] | (0b111<<4);
+    uint16_t v = (voltage/3.3) * 1023;
+    data[0] = data[0] | (v>>6);
+    data[1] = data[1] | (v<<2);
+
+    cs_select(PIN_CS);
+    spi_write_blocking(SPI_PORT, data, len); // where data is a uint8_t array with length len
+    cs_deselect(PIN_CS);
+}
+
+float ram_data_read(uint16_t addr) {
     uint8_t write[7], read[7];
     write[0] = 0b00000011;
     write[1] = addr >> 8;
