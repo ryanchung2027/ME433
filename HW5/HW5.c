@@ -13,6 +13,13 @@
 #define PI 3.14159
 
 
+void spi_ram_init(); 
+void ram_data_write(uint16_t addr, float voltage); 
+static inline void cs_select(uint cs_pin);
+static inline void cs_deselect(uint cs_pin);
+float sin_val(float time);
+
+
 int main()
 {
     stdio_init_all();
@@ -30,12 +37,11 @@ int main()
 
     spi_ram_init();
 
-    float t = 0;
-    while(1) {
+    float t = 0; int i = 0;
+    for (i = 0; i < 1000; i++) {
         float v = sin_val(t); // sine wave
-        data_write(0, v);
+        ram_data_write(0, v);
         t = t + 0.001;
-        sleep_ms(1);
     }
     // // code for math and timing 
     // while (!stdio_usb_connected()) {}
@@ -97,8 +103,16 @@ void spi_ram_init() {
     spi_write_blocking(spi_default, buf, 2);
 }
 
-void ram_data_write() {
-    
+void ram_data_write(uint16_t addr, float voltage) {
+    uint8_t buf[7];
+    buf[0] = 0b00000010;
+    buf[1] = addr >> 8;
+    buf[2] = addr & 0xFF;
+    buf[3] = 
+    buf[4] = 
+    buf[5] = 
+    buf[6] = 
+    buf[7] = 
 }
 
 
