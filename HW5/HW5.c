@@ -129,6 +129,23 @@ void ram_data_write(uint16_t addr, float voltage) {
     spi_write_blocking(spi_default, buf, 7);
 }
 
+float ram_data_read(uint16_t addr, float voltage) {
+    uint8_t write[7], read[7];
+    write[0] = 0b00000011;
+    write[1] = addr >> 8;
+    write[2] = addr & 0xFF;
+    
+    spi_write_read_blocking(spi_default, write, read, 7);
+
+    union FloatInt v;
+    v.i = v.i | read[3] << 24;
+    v.i = v.i | read[4] << 16;
+    v.i = v.i | read[5] << 8;
+    v.i = v.i | read[6];
+
+    return v.f;
+}
+
 
 static inline void cs_select(uint cs_pin) {
     asm volatile("nop \n nop \n nop"); // FIXME
