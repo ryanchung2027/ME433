@@ -12,6 +12,10 @@
 #define PIN_MOSI 19
 #define PI 3.14159
 
+union FloatInt {
+    float f;
+    uint32_t i;
+};
 
 void spi_ram_init(); 
 void ram_data_write(uint16_t addr, float voltage); 
@@ -43,7 +47,12 @@ int main()
         ram_data_write(0, v);
         t = t + 0.001;
     }
-    // // code for math and timing 
+    while(1) {
+
+    }
+
+
+    // // CODE FOR MATH AND TIMING 
     // while (!stdio_usb_connected()) {}
     // sleep_ms(100);
 
@@ -108,11 +117,16 @@ void ram_data_write(uint16_t addr, float voltage) {
     buf[0] = 0b00000010;
     buf[1] = addr >> 8;
     buf[2] = addr & 0xFF;
-    buf[3] = 
-    buf[4] = 
-    buf[5] = 
-    buf[6] = 
-    buf[7] = 
+
+    union FloatInt v;
+    v.f = voltage;
+
+    buf[3] = v.i >> 24;
+    buf[4] = (v.i >> 16) & 0xFF;
+    buf[5] = (v.i >> 8) & 0xFF;
+    buf[6] = v.i & 0xFF;
+
+    spi_write_blocking(spi_default, buf, 7);
 }
 
 
