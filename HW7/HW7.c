@@ -11,7 +11,6 @@
 #define I2C_SDA 8
 #define I2C_SCL 9
 #define HEARTBEAT_INTERVAL 500
-#define PICO_DEFAULT_LED_PIN 16
 
 
 
@@ -39,6 +38,7 @@ int main()
         sleep_ms(1000);
         gpio_put(PICO_DEFAULT_LED_PIN, 0);
         ssd1306_clear();
+        ssd1306_update();
         sleep_ms(1000);
     }
 }
