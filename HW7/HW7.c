@@ -3,6 +3,7 @@
 #include "hardware/i2c.h"
 #include "ssd1306.h"
 #include "font.h"
+#include "hardware/adc.h"
 
 // I2C defines
 // This example will use I2C0 on GPIO8 (SDA) and GPIO9 (SCL) running at 400KHz.
@@ -29,24 +30,31 @@ int main()
     gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
     gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
 
+    adc_init(); // init the adc module
+    adc_gpio_init(26); // set ADC0 pin to be adc input instead of GPIO
+    adc_select_input(0); // select to read from ADC0
+
     // initialize screen
     ssd1306_setup();
 
     
-    char message[50]; 
-    sprintf(message, "Hello world!"); 
-    drawMessage(20,10,message); // draw starting at x=20,y=10  
-    ssd1306_update();
-    // while (true) {
-    //     gpio_put(PICO_DEFAULT_LED_PIN, 1);
-    //     drawChar(64, 16, 'L');
-    //     ssd1306_update();
-    //     sleep_ms(1000);
-    //     gpio_put(PICO_DEFAULT_LED_PIN, 0);
-    //     ssd1306_clear();
-    //     ssd1306_update();
-    //     sleep_ms(1000);
-    // }
+    
+    while (true) {
+        unsigned int t1 = to_us_since_boot(get_absolute_time());
+        uint16_t result = adc_read();
+        float voltage = 0.0008 * result;
+        char message[50], fps_display[10];
+        sprintf(message, "ADC: %.2f", voltage); 
+        drawMessage(0,0,message); // draw starting at x=20,y=10  
+        ssd1306_update();
+        unsigned int t2 = to_us_since_boot(get_absolute_time());
+        unsigned int t_diff = t2-t1; 
+        int fps = 1000000 / t_diff;
+
+        sprintf(fps_display, "FPS: %d", fps);
+        drawMessage(0,24,fps_display);
+        ssd1306_update();
+    }
 }
 
 
