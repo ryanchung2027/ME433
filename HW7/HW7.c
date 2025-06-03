@@ -12,7 +12,7 @@
 #define I2C_SCL 9
 #define HEARTBEAT_INTERVAL 500
 
-
+void drawChar(unsigned char x, unsigned char y, char c);
 
 int main()
 {
@@ -33,12 +33,27 @@ int main()
 
     while (true) {
         gpio_put(PICO_DEFAULT_LED_PIN, 1);
-        ssd1306_drawPixel(0, 0, 1);
+        drawChar(0, 0, 'L');
         ssd1306_update();
         sleep_ms(1000);
         gpio_put(PICO_DEFAULT_LED_PIN, 0);
         ssd1306_clear();
         ssd1306_update();
         sleep_ms(1000);
+    }
+}
+
+
+void drawChar(unsigned char x, unsigned char y, char c) {
+    int row, col, i;
+    row = c-0x20;
+    col = 0;
+    for (col = 0; col < 5; col++) {
+        char byte = ASCII[row][col];
+        for (i = 0; i < 8; i++) {
+            char on_or_off = (byte >> i) & 0b1;
+
+            ssd1306_drawPixel(x+col, y+i, on_or_off);
+        }
     }
 }
