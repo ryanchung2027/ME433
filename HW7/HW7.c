@@ -12,7 +12,8 @@
 #define I2C_SCL 9
 #define HEARTBEAT_INTERVAL 500
 
-void drawChar(unsigned char x, unsigned char y, char c);
+void drawLetter(unsigned char x, unsigned char y, char c);
+void drawMessage(unsigned char x, unsigned char y, char *m);
 
 int main()
 {
@@ -31,20 +32,25 @@ int main()
     // initialize screen
     ssd1306_setup();
 
-    while (true) {
-        gpio_put(PICO_DEFAULT_LED_PIN, 1);
-        drawChar(0, 0, 'L');
-        ssd1306_update();
-        sleep_ms(1000);
-        gpio_put(PICO_DEFAULT_LED_PIN, 0);
-        ssd1306_clear();
-        ssd1306_update();
-        sleep_ms(1000);
-    }
+    
+    char message[50]; 
+    sprintf(message, "Hello world!"); 
+    drawMessage(20,10,message); // draw starting at x=20,y=10  
+    ssd1306_update();
+    // while (true) {
+    //     gpio_put(PICO_DEFAULT_LED_PIN, 1);
+    //     drawChar(64, 16, 'L');
+    //     ssd1306_update();
+    //     sleep_ms(1000);
+    //     gpio_put(PICO_DEFAULT_LED_PIN, 0);
+    //     ssd1306_clear();
+    //     ssd1306_update();
+    //     sleep_ms(1000);
+    // }
 }
 
 
-void drawChar(unsigned char x, unsigned char y, char c) {
+void drawLetter(unsigned char x, unsigned char y, char c) {
     int row, col, i;
     row = c-0x20;
     col = 0;
@@ -55,5 +61,13 @@ void drawChar(unsigned char x, unsigned char y, char c) {
 
             ssd1306_drawPixel(x+col, y+i, on_or_off);
         }
+    }
+}
+
+void drawMessage(unsigned char x, unsigned char y, char *m) {
+    int i = 0;
+    while (m[i] != '\0') {
+        drawLetter(x+i*5, y, m[i]);
+        i++;
     }
 }
