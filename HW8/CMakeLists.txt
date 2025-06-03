@@ -48,7 +48,7 @@ pico_enable_stdio_usb(HW8 0)
 target_link_libraries(HW8
         pico_stdlib
         hardware_pwm
-        )
+        hardware_pio)
 
 # Add the standard include files to the build
 target_include_directories(HW8 PRIVATE
